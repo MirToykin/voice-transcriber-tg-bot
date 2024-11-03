@@ -18,8 +18,20 @@ type Chat struct {
 	ID int `json:"id"`
 }
 
+type File struct {
+	FilePath string `json:"file_path"`
+}
+
+type Voice struct {
+	FileID        string
+	DurationSec   int
+	MimeType      string
+	FileSizeBytes int
+}
+
 type IncomingMessage struct {
-	Audio []byte `json:"audio"`
+	Text  *string
+	Voice *Voice `json:"voice"`
 	From  From   `json:"from"`
 	Chat  Chat   `json:"chat"`
 }

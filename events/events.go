@@ -14,11 +14,13 @@ type Type int
 
 const (
 	Unknown Type = iota
-	Message
+	TextMessage
+	VoiceMessage
 )
 
 type Event struct {
-	Type  Type
-	Audio []byte
-	Meta  interface{}
+	Type          Type
+	AudioFilePath string
+	Text          string
+	Meta          interface{}
 }

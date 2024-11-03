@@ -14,25 +14,38 @@ import (
 
 const (
 	getUpdatesMethod  = "getUpdates"
+	getFile           = "getFile"
 	sendMessageMethod = "sendMessage"
 )
 
 type Client struct {
-	host     string
-	basePath string
-	client   http.Client
+	host         string
+	basePath     string
+	baseFilePath string
+	client       http.Client
 }
 
 func New(host string, token string) Client {
+	basePath := newBasePath(token)
+
 	return Client{
-		host:     host,
-		basePath: newBasePath(token),
-		client:   http.Client{},
+		host:         host,
+		basePath:     basePath,
+		baseFilePath: newBaseFilePath(basePath),
+		client:       http.Client{},
 	}
 }
 
 func newBasePath(token string) string {
 	return "bot" + token
+}
+
+func newBaseFilePath(basePath string) string {
+	return path.Join("file", basePath)
+}
+
+func (c *Client) FilesPath() string {
+	return path.Join(c.host, c.baseFilePath)
 }
 
 func (c *Client) Updates(ctx context.Context, offset, limit int) (updates []Update, err error) {
@@ -66,6 +79,24 @@ func (c *Client) SendMessage(ctx context.Context, chatID int, text string) error
 	}
 
 	return nil
+}
+
+func (c *Client) File(ctx context.Context, fileId string) (file *File, err error) {
+	defer func() { err = e.WrapIfErr("failed to get file", err) }()
+	q := url.Values{}
+	q.Add("file_id", fileId)
+
+	data, err := c.doRequest(ctx, getFile, q)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(data, &file)
+	if err != nil {
+		return nil, err
+	}
+
+	return file, nil
 }
 
 func (c *Client) doRequest(ctx context.Context, method string, query url.Values) (data []byte, err error) {
