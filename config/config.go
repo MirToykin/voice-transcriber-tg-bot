@@ -6,8 +6,9 @@ import (
 )
 
 type Config struct {
-	TgBotToken string
-	DbDSN      string
+	TgBotToken      string
+	DbDSN           string
+	TranscriberHost string
 }
 
 func MustLoad() Config {
@@ -21,8 +22,14 @@ func MustLoad() Config {
 		log.Fatal("database connection isn't set")
 	}
 
+	trbHost := os.Getenv(transcriberHost)
+	if trbHost == "" {
+		log.Fatal("transcriber host isn't set")
+	}
+
 	return Config{
-		TgBotToken: token,
-		DbDSN:      dsn,
+		TgBotToken:      token,
+		DbDSN:           dsn,
+		TranscriberHost: trbHost,
 	}
 }

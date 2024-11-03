@@ -15,15 +15,14 @@ import (
 )
 
 const (
-	tgBotHost       = "api.telegram.org"
-	transcriberHost = "transcriber:50051"
-	batchSize       = 100
+	tgBotHost = "api.telegram.org"
+	batchSize = 100
 )
 
 func main() {
 	cfg := config.MustLoad()
 
-	conn, err := grpc.NewClient(transcriberHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(cfg.TranscriberHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("failed to connect to transcriber service: %s", err)
 	}

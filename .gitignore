@@ -1,2 +1,3 @@
 /.idea/*
 /transcribtion/whisper/bin/
+/.env
