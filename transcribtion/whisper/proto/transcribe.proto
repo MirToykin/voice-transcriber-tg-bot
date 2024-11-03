@@ -2,8 +2,6 @@ syntax = "proto3";
 
 option go_package = "voice_transcriber_bot/transcription/generated";
 
-package transcribe;
-
 service TranscriptionService {
     // Endpoint to transcribe audio by file path
     rpc TranscribeByPath (TranscribePathRequest) returns (TranscriptionResponse);

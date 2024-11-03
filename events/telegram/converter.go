@@ -3,7 +3,6 @@ package telegram
 import (
 	"context"
 	"github.com/pkg/errors"
-	"path"
 	tgClient "voice_transcriber_bot/clients/telegram"
 	"voice_transcriber_bot/events"
 )
@@ -19,6 +18,7 @@ func updateToEvent(ctx context.Context, upd tgClient.Update, client tgClient.Cli
 		ID:            upd.ID,
 		Type:          updType,
 		AudioFilePath: filePath,
+		Text:          fetchText(upd),
 	}
 
 	if updType == events.TextMessage || updType == events.VoiceMessage {
@@ -62,5 +62,13 @@ func fetchFilePath(ctx context.Context, upd tgClient.Update, client tgClient.Cli
 		return "", errors.Wrap(err, "failed to get file info")
 	}
 
-	return path.Join(client.FilesPath(), file.FilePath), nil
+	return client.FileFullPath(file.FilePath), nil
+}
+
+func fetchText(upd tgClient.Update) string {
+	if upd.Message == nil || upd.Message.Text == nil {
+		return ""
+	}
+
+	return *upd.Message.Text
 }

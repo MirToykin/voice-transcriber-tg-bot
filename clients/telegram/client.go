@@ -3,6 +3,7 @@ package telegram
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/pkg/errors"
 	"io"
 	"net/http"
@@ -44,8 +45,8 @@ func newBaseFilePath(basePath string) string {
 	return path.Join("file", basePath)
 }
 
-func (c *Client) FilesPath() string {
-	return path.Join(c.host, c.baseFilePath)
+func (c *Client) FileFullPath(filePath string) string {
+	return "https://" + path.Join(c.host, c.baseFilePath, filePath)
 }
 
 func (c *Client) Updates(ctx context.Context, offset, limit int) (updates []Update, err error) {
@@ -60,7 +61,7 @@ func (c *Client) Updates(ctx context.Context, offset, limit int) (updates []Upda
 		return nil, err
 	}
 
-	var res UpdateResponse
+	var res UpdatesResponse
 	if err = json.Unmarshal(data, &res); err != nil {
 		return nil, err
 	}
@@ -91,10 +92,17 @@ func (c *Client) File(ctx context.Context, fileId string) (file *File, err error
 		return nil, err
 	}
 
-	err = json.Unmarshal(data, &file)
+	var fileRes FileResponse
+	err = json.Unmarshal(data, &fileRes)
 	if err != nil {
 		return nil, err
 	}
+
+	if !fileRes.OK {
+		return nil, errors.New(fmt.Sprintf("code: %d, description: %s", fileRes.ErrorCode, fileRes.Description))
+	}
+
+	file = &fileRes.Result
 
 	return file, nil
 }

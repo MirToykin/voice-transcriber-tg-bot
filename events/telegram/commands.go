@@ -15,7 +15,7 @@ const (
 func (p *Processor) doTextCmd(ctx context.Context, text string, chatID int, username string) error {
 	text = strings.TrimSpace(text)
 
-	log.Printf("got new command '%s' from '%s", text, username)
+	log.Printf("got new command '%s' from '%s'", text, username)
 
 	switch text {
 	case HelpCmd:
@@ -39,6 +39,10 @@ func (p *Processor) sendTranscription(ctx context.Context, chatID int, filePath 
 	transcribedText, err := p.transcriber.TranscribeByPath(ctx, filePath)
 	if err != nil {
 		return errors.Wrap(err, "failed to send transcription")
+	}
+
+	if transcribedText == "" {
+		return p.tgClient.SendMessage(ctx, chatID, "К сожалению, не удалось распознать сообщение")
 	}
 
 	return p.tgClient.SendMessage(ctx, chatID, transcribedText)

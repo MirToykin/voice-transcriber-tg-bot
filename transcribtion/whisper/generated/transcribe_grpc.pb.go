@@ -38,7 +38,7 @@ func NewTranscriptionServiceClient(cc grpc.ClientConnInterface) TranscriptionSer
 
 func (c *transcriptionServiceClient) TranscribeByPath(ctx context.Context, in *TranscribePathRequest, opts ...grpc.CallOption) (*TranscriptionResponse, error) {
 	out := new(TranscriptionResponse)
-	err := c.cc.Invoke(ctx, "/transcribe.TranscriptionService/TranscribeByPath", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/TranscriptionService/TranscribeByPath", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (c *transcriptionServiceClient) TranscribeByPath(ctx context.Context, in *T
 
 func (c *transcriptionServiceClient) TranscribeByBinary(ctx context.Context, in *TranscribeBinaryRequest, opts ...grpc.CallOption) (*TranscriptionResponse, error) {
 	out := new(TranscriptionResponse)
-	err := c.cc.Invoke(ctx, "/transcribe.TranscriptionService/TranscribeByBinary", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/TranscriptionService/TranscribeByBinary", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +98,7 @@ func _TranscriptionService_TranscribeByPath_Handler(srv interface{}, ctx context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/transcribe.TranscriptionService/TranscribeByPath",
+		FullMethod: "/TranscriptionService/TranscribeByPath",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TranscriptionServiceServer).TranscribeByPath(ctx, req.(*TranscribePathRequest))
@@ -116,7 +116,7 @@ func _TranscriptionService_TranscribeByBinary_Handler(srv interface{}, ctx conte
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/transcribe.TranscriptionService/TranscribeByBinary",
+		FullMethod: "/TranscriptionService/TranscribeByBinary",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TranscriptionServiceServer).TranscribeByBinary(ctx, req.(*TranscribeBinaryRequest))
@@ -128,7 +128,7 @@ func _TranscriptionService_TranscribeByBinary_Handler(srv interface{}, ctx conte
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var TranscriptionService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "transcribe.TranscriptionService",
+	ServiceName: "TranscriptionService",
 	HandlerType: (*TranscriptionServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

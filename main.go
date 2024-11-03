@@ -21,6 +21,7 @@ const (
 
 func main() {
 	cfg := config.MustLoad()
+	ctx := context.TODO()
 
 	conn, err := grpc.NewClient(cfg.TranscriberHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -35,14 +36,13 @@ func main() {
 		whisperTranscriber,
 	)
 
-	storage, err := sqlite.New(cfg.DbDSN)
+	storage, err := sqlite.New(ctx, cfg.DbDSN)
 	if err != nil {
 		log.Fatalf("failed to get storage: %s", err)
 	}
 
 	consumer := event_consumer.New(&eventsProcessor, &eventsProcessor, storage, batchSize)
-
-	if err := consumer.Start(context.TODO()); err != nil {
+	if err := consumer.Start(ctx); err != nil {
 		log.Fatalf("service is unable to start: %s", err)
 	}
 }

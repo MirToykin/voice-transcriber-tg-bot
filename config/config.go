@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/joho/godotenv"
 	"log"
 	"os"
 )
@@ -12,6 +13,10 @@ type Config struct {
 }
 
 func MustLoad() Config {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("failed to load .env")
+	}
 	token := os.Getenv(tgBotToken)
 	if token == "" {
 		log.Fatal("Telegram bot token isn't set")

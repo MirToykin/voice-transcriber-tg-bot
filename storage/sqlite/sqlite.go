@@ -15,7 +15,7 @@ type Storage struct {
 	db *sqlx.DB
 }
 
-func New(storagePath string) (*Storage, error) {
+func New(ctx context.Context, storagePath string) (*Storage, error) {
 	db, err := sqlx.Open("sqlite3", storagePath)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to open database")
@@ -25,7 +25,14 @@ func New(storagePath string) (*Storage, error) {
 		return nil, errors.Wrap(err, "failed to connect to database")
 	}
 
-	return &Storage{db: db}, nil
+	s := &Storage{db: db}
+
+	err = s.Init(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to init database")
+	}
+
+	return s, nil
 }
 
 func (s *Storage) SaveUnprocessed(ctx context.Context, event *events.Event) (err error) {
@@ -35,9 +42,9 @@ func (s *Storage) SaveUnprocessed(ctx context.Context, event *events.Event) (err
 		return err
 	}
 
-	q := "INSERT INTO events (file_path, text, meta, processed) values (?, ?, ?, 0)"
+	q := "INSERT INTO events (type, file_path, text, meta, processed) values (?, ?, ?, ?, 0)"
 
-	_, err = s.db.ExecContext(ctx, q, evt.FilePath, evt.Text, evt.Meta)
+	_, err = s.db.ExecContext(ctx, q, evt.Type, evt.FilePath, evt.Text, evt.Meta)
 	if err != nil {
 		return err
 	}
@@ -100,8 +107,10 @@ func (s *Storage) Init(ctx context.Context) error {
 	q := `
 CREATE TABLE IF NOT EXISTS events (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	username TEXT NOT NULL,
-	file_path TEXT NOT NULL,
+	type INTEGER,
+	file_path TEXT,
+	text TEXT,
+	meta TEXT,
 	processed BOOLEAN NOT NULL DEFAULT 0
 );
 

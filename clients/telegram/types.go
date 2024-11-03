@@ -1,8 +1,19 @@
 package telegram
 
-type UpdateResponse struct {
-	OK     bool     `json:"ok"`
+type BaseResponse struct {
+	OK          bool   `json:"ok"`
+	ErrorCode   int    `json:"error_code"`
+	Description string `json:"description"`
+}
+
+type UpdatesResponse struct {
+	BaseResponse
 	Result []Update `json:"result"`
+}
+
+type FileResponse struct {
+	BaseResponse
+	Result File
 }
 
 type Update struct {
@@ -23,10 +34,10 @@ type File struct {
 }
 
 type Voice struct {
-	FileID        string
-	DurationSec   int
-	MimeType      string
-	FileSizeBytes int
+	FileID        string `json:"file_id"`
+	DurationSec   int    `json:"duration"`
+	MimeType      string `json:"mime_type"`
+	FileSizeBytes int    `json:"file_size"`
 }
 
 type IncomingMessage struct {
