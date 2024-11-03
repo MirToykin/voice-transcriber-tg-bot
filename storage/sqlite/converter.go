@@ -1,12 +1,42 @@
 package sqlite
 
-import "voice_transcriber_bot/storage"
+import (
+	"encoding/json"
+	"github.com/pkg/errors"
+	"voice_transcriber_bot/events"
+)
 
-func toStorageEvent(e Event) storage.Event {
-	return storage.Event{
-		ID:        e.ID,
-		Username:  e.Username,
-		FilePath:  e.FilePath,
-		Processed: e.Processed,
+func fromBaseToEvent(event *events.Event) (*Event, error) {
+	stEvent := &Event{
+		Type:     event.Type,
+		FilePath: event.AudioFilePath,
+		Text:     event.Text,
 	}
+
+	stMeta, err := json.Marshal(event.Meta)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to marshal event meta")
+	}
+
+	stEvent.Meta = string(stMeta)
+
+	return stEvent, nil
+}
+
+func fromEventToBase(event *Event) (*events.Event, error) {
+	baseEvent := &events.Event{
+		Type:          event.Type,
+		AudioFilePath: event.FilePath,
+		Text:          event.Text,
+	}
+
+	var meta interface{}
+	err := json.Unmarshal([]byte(event.Meta), &meta)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to unmarshal event meta")
+	}
+
+	baseEvent.Meta = meta
+
+	return baseEvent, nil
 }

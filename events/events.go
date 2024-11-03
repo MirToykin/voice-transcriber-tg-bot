@@ -19,6 +19,7 @@ const (
 )
 
 type Event struct {
+	ID            any
 	Type          Type
 	AudioFilePath string
 	Text          string

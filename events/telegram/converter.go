@@ -16,6 +16,7 @@ func updateToEvent(ctx context.Context, upd tgClient.Update, client tgClient.Cli
 	}
 
 	res := &events.Event{
+		ID:            upd.ID,
 		Type:          updType,
 		AudioFilePath: filePath,
 	}
