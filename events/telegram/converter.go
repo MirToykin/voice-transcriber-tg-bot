@@ -2,9 +2,9 @@ package telegram
 
 import (
 	"context"
+	tgClient "github.com/MirToykin/voice-transcriber-tg-bot/clients/telegram"
+	"github.com/MirToykin/voice-transcriber-tg-bot/events"
 	"github.com/pkg/errors"
-	tgClient "voice_transcriber_bot/clients/telegram"
-	"voice_transcriber_bot/events"
 )
 
 func updateToEvent(ctx context.Context, upd tgClient.Update, client tgClient.Client) (*events.Event, error) {
@@ -23,8 +23,8 @@ func updateToEvent(ctx context.Context, upd tgClient.Update, client tgClient.Cli
 
 	if updType == events.TextMessage || updType == events.VoiceMessage {
 		res.Meta = Meta{
-			ChatID:   upd.Message.Chat.ID,
-			Username: upd.Message.From.Username,
+			ChatID: upd.Message.Chat.ID,
+			User:   upd.Message.From,
 		}
 	}
 
@@ -42,7 +42,7 @@ func toTgProcessorMeta(event *events.Event) (Meta, error) {
 
 func fetchType(upd tgClient.Update) events.Type {
 	if upd.Message != nil {
-		if upd.Message.Text != nil {
+		if upd.Message.Text != nil && upd.Message.Voice == nil {
 			return events.TextMessage
 		} else if upd.Message.Voice != nil {
 			return events.VoiceMessage

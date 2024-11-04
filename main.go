@@ -2,16 +2,16 @@ package main
 
 import (
 	"context"
+	tgClient "github.com/MirToykin/voice-transcriber-tg-bot/clients/telegram"
+	"github.com/MirToykin/voice-transcriber-tg-bot/config"
+	event_consumer "github.com/MirToykin/voice-transcriber-tg-bot/consumer/event-consumer"
+	"github.com/MirToykin/voice-transcriber-tg-bot/events/telegram"
+	"github.com/MirToykin/voice-transcriber-tg-bot/storage/sqlite"
+	"github.com/MirToykin/voice-transcriber-tg-bot/transcribtion/whisper"
+	"github.com/MirToykin/voice-transcriber-tg-bot/transcribtion/whisper/generated"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"log"
-	tgClient "voice_transcriber_bot/clients/telegram"
-	"voice_transcriber_bot/config"
-	event_consumer "voice_transcriber_bot/consumer/event-consumer"
-	"voice_transcriber_bot/events/telegram"
-	"voice_transcriber_bot/storage/sqlite"
-	"voice_transcriber_bot/transcribtion/whisper"
-	"voice_transcriber_bot/transcribtion/whisper/generated"
 )
 
 const (

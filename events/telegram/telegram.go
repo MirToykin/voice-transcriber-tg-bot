@@ -2,11 +2,11 @@ package telegram
 
 import (
 	"context"
+	tgClient "github.com/MirToykin/voice-transcriber-tg-bot/clients/telegram"
+	"github.com/MirToykin/voice-transcriber-tg-bot/events"
+	"github.com/MirToykin/voice-transcriber-tg-bot/transcribtion"
 	"github.com/pkg/errors"
 	"log"
-	tgClient "voice_transcriber_bot/clients/telegram"
-	"voice_transcriber_bot/events"
-	"voice_transcriber_bot/transcribtion"
 )
 
 type Processor struct {
@@ -16,8 +16,8 @@ type Processor struct {
 }
 
 type Meta struct {
-	ChatID   int
-	Username string
+	ChatID int
+	User   tgClient.From
 }
 
 var (
@@ -78,7 +78,7 @@ func (p *Processor) processTextMessage(ctx context.Context, e *events.Event) err
 		return errors.Wrap(err, "failed to process text message")
 	}
 
-	err = p.doTextCmd(ctx, e.Text, meta.ChatID, meta.Username)
+	err = p.doTextCmd(ctx, e.Text, meta.ChatID, &meta.User)
 	if err != nil {
 		return errors.Wrap(err, "failed to perform text cmd")
 	}
@@ -92,5 +92,10 @@ func (p *Processor) processVoiceMessage(ctx context.Context, e *events.Event) er
 		return errors.Wrap(err, "failed to process voice message")
 	}
 
-	return p.sendTranscription(ctx, meta.ChatID, e.AudioFilePath)
+	var langCode *string
+	if meta.User.LanguageCode != "" {
+		langCode = &meta.User.LanguageCode
+	}
+
+	return p.sendTranscription(ctx, meta.ChatID, e.AudioFilePath, langCode)
 }

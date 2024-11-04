@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "voice_transcriber_bot/transcription/generated";
+option go_package = "github.com/MirToykin/voice-transcriber-tg-bot/transcription/generated";
 
 service TranscriptionService {
     // Endpoint to transcribe audio by file path

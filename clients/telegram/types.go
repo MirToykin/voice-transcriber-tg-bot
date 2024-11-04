@@ -22,7 +22,8 @@ type Update struct {
 }
 
 type From struct {
-	Username string `json:"username"`
+	Username     string `json:"username"`
+	LanguageCode string `json:"language_code"`
 }
 
 type Chat struct {

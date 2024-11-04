@@ -2,8 +2,8 @@ package whisper
 
 import (
 	"context"
+	"github.com/MirToykin/voice-transcriber-tg-bot/transcribtion/whisper/generated"
 	"github.com/pkg/errors"
-	"voice_transcriber_bot/transcribtion/whisper/generated"
 )
 
 type Transcriber struct {
@@ -16,10 +16,11 @@ func New(client generated.TranscriptionServiceClient) *Transcriber {
 	}
 }
 
-func (t *Transcriber) TranscribeByPath(ctx context.Context, filePath string) (string, error) {
+func (t *Transcriber) TranscribeByPath(ctx context.Context, filePath string, lang *string) (string, error) {
 	res, err := t.client.TranscribeByPath(
 		ctx, &generated.TranscribePathRequest{
 			FilePath: filePath,
+			Lang:     lang,
 		},
 	)
 
@@ -30,10 +31,11 @@ func (t *Transcriber) TranscribeByPath(ctx context.Context, filePath string) (st
 	return res.GetText(), nil
 }
 
-func (t *Transcriber) TranscribeByBinary(ctx context.Context, audioData []byte) (string, error) {
+func (t *Transcriber) TranscribeByBinary(ctx context.Context, audioData []byte, lang *string) (string, error) {
 	res, err := t.client.TranscribeByBinary(
 		ctx, &generated.TranscribeBinaryRequest{
 			AudioData: audioData,
+			Lang:      lang,
 		},
 	)
 

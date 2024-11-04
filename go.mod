@@ -1,4 +1,4 @@
-module voice_transcriber_bot
+module github.com/MirToykin/voice-transcriber-tg-bot
 
 go 1.22
 

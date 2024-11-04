@@ -2,12 +2,12 @@ package event_consumer
 
 import (
 	"context"
+	"github.com/MirToykin/voice-transcriber-tg-bot/events"
+	"github.com/MirToykin/voice-transcriber-tg-bot/storage"
 	"github.com/pkg/errors"
 	"log"
 	"sync"
 	"time"
-	"voice_transcriber_bot/events"
-	"voice_transcriber_bot/storage"
 )
 
 type Consumer struct {

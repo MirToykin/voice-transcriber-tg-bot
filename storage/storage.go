@@ -2,7 +2,7 @@ package storage
 
 import (
 	"context"
-	"voice_transcriber_bot/events"
+	"github.com/MirToykin/voice-transcriber-tg-bot/events"
 )
 
 type Storage interface {

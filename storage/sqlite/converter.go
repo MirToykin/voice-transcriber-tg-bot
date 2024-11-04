@@ -2,8 +2,8 @@ package sqlite
 
 import (
 	"encoding/json"
+	"github.com/MirToykin/voice-transcriber-tg-bot/events"
 	"github.com/pkg/errors"
-	"voice_transcriber_bot/events"
 )
 
 func fromBaseToEvent(event *events.Event) (*Event, error) {

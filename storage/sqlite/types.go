@@ -1,6 +1,6 @@
 package sqlite
 
-import "voice_transcriber_bot/events"
+import "github.com/MirToykin/voice-transcriber-tg-bot/events"
 
 type Event struct {
 	ID        uint        `db:"id"`

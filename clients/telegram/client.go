@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/MirToykin/voice-transcriber-tg-bot/lib/e"
 	"github.com/pkg/errors"
 	"io"
 	"net/http"
 	"net/url"
 	"path"
 	"strconv"
-	"voice_transcriber_bot/lib/e"
 )
 
 const (

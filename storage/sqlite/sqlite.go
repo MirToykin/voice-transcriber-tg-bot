@@ -3,12 +3,12 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	"github.com/MirToykin/voice-transcriber-tg-bot/events"
+	"github.com/MirToykin/voice-transcriber-tg-bot/lib/e"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/pkg/errors"
 	"log"
-	"voice_transcriber_bot/events"
-	"voice_transcriber_bot/lib/e"
 )
 
 type Storage struct {
