@@ -36,15 +36,15 @@ func (p *Processor) sendHello(ctx context.Context, chatID int, user *tgClient.Fr
 	return p.tgClient.SendMessage(ctx, chatID, getHelloMsg(user.Username, user.LanguageCode))
 }
 
-func (p *Processor) sendTranscription(ctx context.Context, chatID int, filePath string, lang *string) (err error) {
+func (p *Processor) sendTranscription(ctx context.Context, meta Meta, filePath string, lang *string) (err error) {
 	transcribedText, err := p.transcriber.TranscribeByPath(ctx, filePath, lang)
 	if err != nil {
 		return errors.Wrap(err, "failed to send transcription")
 	}
 
 	if transcribedText == "" {
-		return p.tgClient.SendMessage(ctx, chatID, "К сожалению, не удалось распознать сообщение")
+		return p.tgClient.SendMessage(ctx, meta.ChatID, "К сожалению, не удалось распознать сообщение")
 	}
 
-	return p.tgClient.SendMessage(ctx, chatID, transcribedText)
+	return p.tgClient.SendReplyMessage(ctx, meta.ChatID, transcribedText, meta.MessageID)
 }

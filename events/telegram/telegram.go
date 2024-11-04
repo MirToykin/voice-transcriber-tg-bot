@@ -16,8 +16,9 @@ type Processor struct {
 }
 
 type Meta struct {
-	ChatID int
-	User   tgClient.From
+	ChatID    int
+	User      tgClient.From
+	MessageID int
 }
 
 var (
@@ -92,10 +93,15 @@ func (p *Processor) processVoiceMessage(ctx context.Context, e *events.Event) er
 		return errors.Wrap(err, "failed to process voice message")
 	}
 
+	return p.sendTranscription(ctx, meta, e.AudioFilePath, fetchLanguageCode(meta.User.LanguageCode))
+}
+
+func fetchLanguageCode(userLanguageCode string) *string {
 	var langCode *string
-	if meta.User.LanguageCode != "" {
-		langCode = &meta.User.LanguageCode
+
+	if userLanguageCode != "" {
+		langCode = &userLanguageCode
 	}
 
-	return p.sendTranscription(ctx, meta.ChatID, e.AudioFilePath, langCode)
+	return langCode
 }

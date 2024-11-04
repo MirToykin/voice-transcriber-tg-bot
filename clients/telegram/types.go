@@ -42,8 +42,9 @@ type Voice struct {
 }
 
 type IncomingMessage struct {
-	Text  *string
-	Voice *Voice `json:"voice"`
-	From  From   `json:"from"`
-	Chat  Chat   `json:"chat"`
+	ID    int     `json:"message_id"`
+	Text  *string `json:"text"`
+	Voice *Voice  `json:"voice"`
+	From  From    `json:"from"`
+	Chat  Chat    `json:"chat"`
 }

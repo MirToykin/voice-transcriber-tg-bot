@@ -23,8 +23,9 @@ func updateToEvent(ctx context.Context, upd tgClient.Update, client tgClient.Cli
 
 	if updType == events.TextMessage || updType == events.VoiceMessage {
 		res.Meta = Meta{
-			ChatID: upd.Message.Chat.ID,
-			User:   upd.Message.From,
+			ChatID:    upd.Message.Chat.ID,
+			User:      upd.Message.From,
+			MessageID: upd.Message.ID,
 		}
 	}
 

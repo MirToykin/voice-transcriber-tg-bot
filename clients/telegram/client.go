@@ -82,6 +82,20 @@ func (c *Client) SendMessage(ctx context.Context, chatID int, text string) error
 	return nil
 }
 
+func (c *Client) SendReplyMessage(ctx context.Context, chatID int, text string, messageID int) error {
+	q := url.Values{}
+	q.Add("chat_id", strconv.Itoa(chatID))
+	q.Add("text", text)
+	q.Add("reply_to_message_id", strconv.Itoa(messageID))
+
+	_, err := c.doRequest(ctx, sendMessageMethod, q)
+	if err != nil {
+		return errors.Wrap(err, "failed to send message")
+	}
+
+	return nil
+}
+
 func (c *Client) File(ctx context.Context, fileId string) (file *File, err error) {
 	defer func() { err = e.WrapIfErr("failed to get file", err) }()
 	q := url.Values{}
