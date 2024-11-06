@@ -18,10 +18,15 @@ const (
 	VoiceMessage
 )
 
+type AudioFile struct {
+	Path      string
+	SizeBytes int
+}
+
 type Event struct {
-	ID            any
-	Type          Type
-	AudioFilePath string
-	Text          string
-	Meta          interface{}
+	ID        any
+	Type      Type
+	AudioFile AudioFile
+	Text      string
+	Meta      interface{}
 }

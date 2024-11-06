@@ -15,10 +15,13 @@ func updateToEvent(ctx context.Context, upd tgClient.Update, client tgClient.Cli
 	}
 
 	res := &events.Event{
-		ID:            upd.ID,
-		Type:          updType,
-		AudioFilePath: filePath,
-		Text:          fetchText(upd),
+		ID:   upd.ID,
+		Type: updType,
+		AudioFile: events.AudioFile{
+			Path:      filePath,
+			SizeBytes: fetchFileSize(upd),
+		},
+		Text: fetchText(upd),
 	}
 
 	if updType == events.TextMessage || updType == events.VoiceMessage {
@@ -72,4 +75,12 @@ func fetchText(upd tgClient.Update) string {
 	}
 
 	return *upd.Message.Text
+}
+
+func fetchFileSize(upd tgClient.Update) int {
+	if upd.Message == nil || upd.Message.Voice == nil {
+		return 0
+	}
+
+	return upd.Message.Voice.FileSizeBytes
 }

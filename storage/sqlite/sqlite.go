@@ -42,9 +42,9 @@ func (s *Storage) SaveUnprocessed(ctx context.Context, event *events.Event) (err
 		return err
 	}
 
-	q := "INSERT INTO events (type, file_path, text, meta, processed) values (?, ?, ?, ?, 0)"
+	q := "INSERT INTO events (type, file_path, file_size, text, meta, processed) values (?, ?, ?, ?, ?, 0)"
 
-	_, err = s.db.ExecContext(ctx, q, evt.Type, evt.FilePath, evt.Text, evt.Meta)
+	_, err = s.db.ExecContext(ctx, q, evt.Type, evt.FilePath, evt.FileSize, evt.Text, evt.Meta)
 	if err != nil {
 		return err
 	}
@@ -109,6 +109,7 @@ CREATE TABLE IF NOT EXISTS events (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	type INTEGER,
 	file_path TEXT,
+	file_size integer,
 	text TEXT,
 	meta TEXT,
 	processed BOOLEAN NOT NULL DEFAULT 0

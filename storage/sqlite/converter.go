@@ -9,7 +9,8 @@ import (
 func fromBaseToEvent(event *events.Event) (*Event, error) {
 	stEvent := &Event{
 		Type:     event.Type,
-		FilePath: event.AudioFilePath,
+		FilePath: event.AudioFile.Path,
+		FileSize: event.AudioFile.SizeBytes,
 		Text:     event.Text,
 	}
 
@@ -25,9 +26,12 @@ func fromBaseToEvent(event *events.Event) (*Event, error) {
 
 func fromEventToBase(event *Event) (*events.Event, error) {
 	baseEvent := &events.Event{
-		Type:          event.Type,
-		AudioFilePath: event.FilePath,
-		Text:          event.Text,
+		Type: event.Type,
+		AudioFile: events.AudioFile{
+			Path:      event.FilePath,
+			SizeBytes: event.FileSize,
+		},
+		Text: event.Text,
 	}
 
 	var meta interface{}

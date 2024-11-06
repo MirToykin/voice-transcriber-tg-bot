@@ -2,11 +2,18 @@ package telegram
 
 import (
 	"context"
+	"fmt"
 	tgClient "github.com/MirToykin/voice-transcriber-tg-bot/clients/telegram"
 	"github.com/MirToykin/voice-transcriber-tg-bot/events"
+	"github.com/MirToykin/voice-transcriber-tg-bot/lib/e"
 	"github.com/MirToykin/voice-transcriber-tg-bot/transcribtion"
 	"github.com/pkg/errors"
 	"log"
+)
+
+const (
+	allowedSizeMB  = 10
+	showInfoSizeMB = 3
 )
 
 type Processor struct {
@@ -87,13 +94,49 @@ func (p *Processor) processTextMessage(ctx context.Context, e *events.Event) err
 	return nil
 }
 
-func (p *Processor) processVoiceMessage(ctx context.Context, e *events.Event) error {
-	meta, err := toTgProcessorMeta(e)
+func (p *Processor) processVoiceMessage(ctx context.Context, evt *events.Event) (err error) {
+	defer func() { err = e.WrapIfErr("failed to process voice message", err) }()
+	meta, err := toTgProcessorMeta(evt)
 	if err != nil {
-		return errors.Wrap(err, "failed to process voice message")
+		return err
 	}
 
-	return p.sendTranscription(ctx, meta, e.AudioFilePath, fetchLanguageCode(meta.User.LanguageCode))
+	return p.sendMsgDependingOnFileSize(ctx, evt, meta)
+}
+
+func (p *Processor) sendMsgDependingOnFileSize(ctx context.Context, evt *events.Event, meta Meta) error {
+	fileSize := evt.AudioFile.SizeBytes
+	if fileSize > getBytesSize(allowedSizeMB) {
+		return p.sendFileSizeExceeded(ctx, meta)
+	} else if fileSize >= getBytesSize(showInfoSizeMB) {
+		return p.sendWithInfo(ctx, evt, meta)
+	} else {
+		return p.sendTranscription(ctx, meta, evt.AudioFile.Path, fetchLanguageCode(meta.User.LanguageCode))
+	}
+}
+
+func (p *Processor) sendFileSizeExceeded(ctx context.Context, meta Meta) error {
+	return p.tgClient.SendReplyMessage(
+		ctx,
+		meta.ChatID,
+		fmt.Sprintf("Разрешенный размер файла до %d МБ", allowedSizeMB),
+		meta.MessageID,
+	)
+}
+
+func (p *Processor) sendWithInfo(ctx context.Context, evt *events.Event, meta Meta) error {
+	err := p.tgClient.SendReplyMessage(
+		ctx,
+		meta.ChatID,
+		"Идет распознавание файла, процесс может занять некоторое время.",
+		meta.MessageID,
+	)
+
+	if err != nil {
+		log.Printf("failed to send info message: %s\n", err.Error())
+	}
+
+	return p.sendTranscription(ctx, meta, evt.AudioFile.Path, fetchLanguageCode(meta.User.LanguageCode))
 }
 
 func fetchLanguageCode(userLanguageCode string) *string {
@@ -104,4 +147,8 @@ func fetchLanguageCode(userLanguageCode string) *string {
 	}
 
 	return langCode
+}
+
+func getBytesSize(mbSize int) int {
+	return mbSize * 1024 * 1024
 }
