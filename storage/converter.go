@@ -8,7 +8,7 @@ import (
 
 func FromStorageToBaseEvent(event *Event) (*events.Event, error) {
 	var meta interface{}
-	err := json.Unmarshal([]byte(event.Meta), meta)
+	err := json.Unmarshal([]byte(event.Meta), &meta)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to convert storage event to base event")
 	}

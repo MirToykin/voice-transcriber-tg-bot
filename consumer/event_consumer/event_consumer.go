@@ -96,16 +96,23 @@ func (c *Consumer) handleEvent(ctx context.Context, wg *sync.WaitGroup, event *e
 	err := task()
 
 	if err != nil {
-		log.Printf("ERROR: failed to process event %d: %s\n", event.ID, err)
+		var processingError *events.ProcessingError
+		isCustomErr := errors.As(err, &processingError)
 
-		storageEvent, err := storage.FromBaseToStorageEvent(event)
-		if err != nil {
-			log.Printf("failed to process event: %s", err)
-		}
+		if !isCustomErr || processingError.NeedRetry {
+			log.Printf("ERROR: failed to process event %d: %s\n", event.ID, err)
 
-		err = c.storage.SaveUnprocessed(ctx, storageEvent)
-		if err != nil {
-			log.Printf("ERROR: failed to save unprocessed event %d: %s\n", event.ID, err)
+			storageEvent, err := storage.FromBaseToStorageEvent(event)
+			if err != nil {
+				log.Printf("failed to process event: %s", err)
+			}
+
+			err = c.storage.SaveUnprocessed(ctx, storageEvent)
+			if err != nil {
+				log.Printf("ERROR: failed to save unprocessed event %d: %s\n", event.ID, err)
+			}
+		} else {
+			log.Printf("ERROR processing event with no retry: %s", processingError)
 		}
 	}
 }
@@ -140,7 +147,14 @@ func (c *Consumer) handleUnprocessedEvent(ctx context.Context, wg *sync.WaitGrou
 	err = task()
 
 	if err != nil {
-		log.Printf("ERROR: failed to process unprocessed event %d: %s\n", event.ID, err)
+		var processingError *events.ProcessingError
+		isCustomErr := errors.As(err, &processingError)
+		if !isCustomErr || processingError.NeedRetry {
+			log.Printf("ERROR: failed to process unprocessed event %d: %s\n", event.ID, err)
+			return
+		} else {
+			log.Printf("ERROR processing unprocessed with no retry: %s", processingError.Error())
+		}
 	}
 
 	err = c.storage.SetProcessed(ctx, event.ID)

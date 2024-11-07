@@ -2,6 +2,8 @@ package telegram
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	tgClient "github.com/MirToykin/voice-transcriber-tg-bot/clients/telegram"
 	"github.com/MirToykin/voice-transcriber-tg-bot/events"
 	"github.com/pkg/errors"
@@ -38,7 +40,21 @@ func updateToEvent(ctx context.Context, upd tgClient.Update, client tgClient.Cli
 func toTgProcessorMeta(event *events.Event) (Meta, error) {
 	res, ok := event.Meta.(Meta)
 	if !ok {
-		return Meta{}, errors.Wrap(ErrUnknownMetaType, "can't get meta")
+		data, err := json.Marshal(event.Meta)
+		if err != nil {
+			return Meta{}, errors.Wrap(
+				ErrUnknownMetaType,
+				fmt.Sprintf("unable to get meta (second try): %s", err.Error()),
+			)
+		}
+
+		err = json.Unmarshal(data, &res)
+		if err != nil {
+			return Meta{}, errors.Wrap(
+				ErrUnknownMetaType,
+				fmt.Sprintf("unable to get meta (second try): %s", err.Error()),
+			)
+		}
 	}
 
 	return res, nil
