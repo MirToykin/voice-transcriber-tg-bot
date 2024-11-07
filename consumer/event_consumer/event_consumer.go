@@ -69,6 +69,7 @@ func (c *Consumer) StartUnprocessed(ctx context.Context) error {
 		}
 
 		c.handleUnprocessedEvents(ctx, storageEvents)
+		time.Sleep(30)
 	}
 }
 
