@@ -70,7 +70,7 @@ func (s *Storage) DeleteProcessed(ctx context.Context) error {
 }
 
 func (s *Storage) FetchUnprocessed(ctx context.Context, limit int) ([]*storage.Event, error) {
-	q := "SELECT id, file_path, text, meta FROM unprocessed_events WHERE processed = 0 LIMIT ?"
+	q := "SELECT id, file_path, text, meta FROM events WHERE processed = 0 LIMIT ?"
 
 	var eventsList []Event
 
