@@ -40,7 +40,7 @@ func New(client tgClient.Client, transcriber transcribtion.Transcriber) Processo
 	}
 }
 
-func (p *Processor) Fetch(ctx context.Context, limit int) ([]events.Event, error) {
+func (p *Processor) Fetch(ctx context.Context, limit int) ([]*events.Event, error) {
 	updates, err := p.tgClient.Updates(ctx, p.offset, limit)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get tg updates")
@@ -50,7 +50,7 @@ func (p *Processor) Fetch(ctx context.Context, limit int) ([]events.Event, error
 		return nil, nil
 	}
 
-	res := make([]events.Event, 0, len(updates))
+	res := make([]*events.Event, 0, len(updates))
 
 	for i, u := range updates {
 		ev, err := updateToEvent(ctx, u, p.tgClient)
@@ -61,7 +61,7 @@ func (p *Processor) Fetch(ctx context.Context, limit int) ([]events.Event, error
 			break
 		}
 
-		res = append(res, *ev)
+		res = append(res, ev)
 	}
 
 	p.offset = updates[len(updates)-1].ID + 1

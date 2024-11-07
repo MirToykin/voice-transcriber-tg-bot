@@ -34,7 +34,7 @@ func (c *Consumer) Start(ctx context.Context) error {
 		}
 		gotEvents, err := c.fetcher.Fetch(context.Background(), c.batchSize)
 		if err != nil {
-			log.Printf("[ERR] consumer: %s", err.Error())
+			log.Printf("[ERR] consumer: %s\n", err.Error())
 			failsCount++
 			time.Sleep(500 * time.Millisecond)
 			continue
@@ -49,12 +49,38 @@ func (c *Consumer) Start(ctx context.Context) error {
 	}
 }
 
-func (c *Consumer) handleEvents(ctx context.Context, eventsList []events.Event) {
+func (c *Consumer) StartUnprocessed(ctx context.Context) error {
+	failsCount := 0
+	for {
+		if failsCount >= 15 {
+			return errors.New("unable to start handling unprocessed events")
+		}
+		storageEvents, err := c.storage.FetchUnprocessed(ctx, c.batchSize)
+		if err != nil {
+			log.Printf("[ERR] handling unprocessed events: %s\n", err.Error())
+			failsCount++
+			time.Sleep(500 * time.Millisecond)
+			continue
+		}
+
+		if len(storageEvents) == 0 {
+			time.Sleep(30 * time.Second)
+			continue
+		}
+
+		c.handleUnprocessedEvents(ctx, storageEvents)
+	}
+}
+
+func (c *Consumer) handleEvents(
+	ctx context.Context,
+	eventsList []*events.Event,
+) {
 	wg := sync.WaitGroup{}
 	wg.Add(len(eventsList))
 
 	for _, e := range eventsList {
-		go c.handleEvent(ctx, &wg, &e)
+		go c.handleEvent(ctx, &wg, e)
 	}
 
 	wg.Wait()
@@ -71,10 +97,55 @@ func (c *Consumer) handleEvent(ctx context.Context, wg *sync.WaitGroup, event *e
 
 	if err != nil {
 		log.Printf("ERROR: failed to process event %d: %s\n", event.ID, err)
-		err = c.storage.SaveUnprocessed(ctx, event)
+
+		storageEvent, err := storage.FromBaseToStorageEvent(event)
+		if err != nil {
+			log.Printf("failed to process event: %s", err)
+		}
+
+		err = c.storage.SaveUnprocessed(ctx, storageEvent)
 		if err != nil {
 			log.Printf("ERROR: failed to save unprocessed event %d: %s\n", event.ID, err)
 		}
+	}
+}
+
+func (c *Consumer) handleUnprocessedEvents(
+	ctx context.Context,
+	events []*storage.Event,
+) {
+	wg := sync.WaitGroup{}
+	wg.Add(len(events))
+
+	for _, e := range events {
+		go c.handleUnprocessedEvent(ctx, &wg, e)
+	}
+
+	wg.Wait()
+}
+
+func (c *Consumer) handleUnprocessedEvent(ctx context.Context, wg *sync.WaitGroup, event *storage.Event) {
+	defer wg.Done()
+	baseEvent, err := storage.FromStorageToBaseEvent(event)
+	if err != nil {
+		log.Printf("ERROR: failed to process unprocessed event: %s\n", err)
+		return
+	}
+
+	task := withRetry(
+		func() error {
+			return c.processor.Process(ctx, baseEvent)
+		}, 3,
+	)
+	err = task()
+
+	if err != nil {
+		log.Printf("ERROR: failed to process unprocessed event %d: %s\n", event.ID, err)
+	}
+
+	err = c.storage.SetProcessed(ctx, event.ID)
+	if err != nil {
+		log.Printf("failed to set event %d as processed", event.ID)
 	}
 }
 

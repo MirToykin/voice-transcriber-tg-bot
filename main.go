@@ -4,7 +4,7 @@ import (
 	"context"
 	tgClient "github.com/MirToykin/voice-transcriber-tg-bot/clients/telegram"
 	"github.com/MirToykin/voice-transcriber-tg-bot/config"
-	event_consumer "github.com/MirToykin/voice-transcriber-tg-bot/consumer/event-consumer"
+	event_consumer "github.com/MirToykin/voice-transcriber-tg-bot/consumer/event_consumer"
 	"github.com/MirToykin/voice-transcriber-tg-bot/events/telegram"
 	"github.com/MirToykin/voice-transcriber-tg-bot/storage/sqlite"
 	"github.com/MirToykin/voice-transcriber-tg-bot/transcribtion/whisper"
@@ -12,6 +12,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"log"
+	"sync"
 )
 
 const (
@@ -42,7 +43,22 @@ func main() {
 	}
 
 	consumer := event_consumer.New(&eventsProcessor, &eventsProcessor, storage, batchSize)
-	if err := consumer.Start(ctx); err != nil {
-		log.Fatalf("service is unable to start: %s", err)
-	}
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		if err := consumer.Start(ctx); err != nil {
+			log.Fatalf("service is unable to start consuming events: %s", err)
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		if err := consumer.StartUnprocessed(ctx); err != nil {
+			log.Fatalf("service is unable to start consuming unprocessed events: %s", err)
+		}
+	}()
+
+	wg.Wait()
 }
