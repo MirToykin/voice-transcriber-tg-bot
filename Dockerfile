@@ -17,7 +17,6 @@ RUN apk update && \
 
 WORKDIR /root/
 RUN mkdir storage
-RUN chmod -R 766 storage
 COPY --from=builder /github.com/MirToykin/voice-transcriber-tg-bot/source/bin/transcriber_bot .
 
-CMD ["./transcriber_bot"]
+CMD ["sh", "-c", "chmod -R 766 /root/storage/ && ./transcriber_bot"]
