@@ -1,7 +1,7 @@
 FROM golang:1.22.1-alpine3.19 AS builder
 
-COPY . github.com/MirToykin/voice-transcriber-tg-bot/source/
-WORKDIR github.com/MirToykin/voice-transcriber-tg-bot/source/
+COPY . /github.com/MirToykin/voice-transcriber-tg-bot/source/
+WORKDIR /github.com/MirToykin/voice-transcriber-tg-bot/source/
 
 RUN go mod download
 RUN go build -o ./bin/transcriber_bot main.go
@@ -15,3 +15,5 @@ RUN apk update && \
 
 WORKDIR /root/
 COPY --from=builder /github.com/MirToykin/voice-transcriber-tg-bot/source/bin/transcriber_bot .
+
+CMD ["./transcriber_bot"]
