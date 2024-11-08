@@ -19,4 +19,4 @@ COPY --from=builder /github.com/MirToykin/voice-transcriber-tg-bot/source/bin/tr
 
 RUN ls -l /root/
 
-CMD ["./transcriber_bot"]
+CMD ["/root/transcriber_bot"]
