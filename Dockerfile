@@ -15,8 +15,7 @@ RUN apk update && \
     rm -rf /var/cache/apk/*
 
 WORKDIR /root/
+RUN mkdir "storage"
 COPY --from=builder /github.com/MirToykin/voice-transcriber-tg-bot/source/bin/transcriber_bot .
 
-RUN ls -l /root/
-
-CMD ["/root/transcriber_bot"]
+CMD ["./transcriber_bot"]
