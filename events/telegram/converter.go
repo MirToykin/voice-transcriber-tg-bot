@@ -57,6 +57,10 @@ func toTgProcessorMeta(event *events.Event) (Meta, error) {
 		}
 	}
 
+	if res.User.LanguageCode == "" {
+		res.User.LanguageCode = defaultLanguage
+	}
+
 	return res, nil
 }
 
