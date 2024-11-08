@@ -4,6 +4,7 @@ COPY . /github.com/MirToykin/voice-transcriber-tg-bot/source/
 WORKDIR /github.com/MirToykin/voice-transcriber-tg-bot/source/
 
 RUN go mod download
+RUN apt-get update && apt-get install -y gcc libsqlite3-dev
 RUN CGO_ENABLED=1 go build -o ./bin/transcriber_bot main.go
 RUN chmod +x ./bin/transcriber_bot
 
