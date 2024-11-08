@@ -7,6 +7,7 @@ import (
 	"github.com/MirToykin/voice-transcriber-tg-bot/lib/e"
 	"github.com/pkg/errors"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"path"
@@ -60,6 +61,8 @@ func (c *Client) Updates(ctx context.Context, offset, limit int) (updates []Upda
 	if err != nil {
 		return nil, err
 	}
+
+	log.Printf("Telegram updates response: %s", string(data))
 
 	var res UpdatesResponse
 	if err = json.Unmarshal(data, &res); err != nil {
