@@ -56,7 +56,7 @@ jobs:
             # create .env
             echo "TAG_NAME=$TAG_NAME" > .env
             echo "$ENV_FILE" >> .env
-            echo "$DB_DSN" >> .env
+            echo "DB_DSN=./storage/$DB_DSN" >> .env
             
             if [ ! -f "${{ vars.SERVICE_PATH }}/storage/$DB_DSN" ]; then
               echo "Storage doesn't exist. Creating storage file..."
