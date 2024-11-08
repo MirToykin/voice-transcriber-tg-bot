@@ -17,4 +17,6 @@ RUN apk update && \
 WORKDIR /root/
 COPY --from=builder /github.com/MirToykin/voice-transcriber-tg-bot/source/bin/transcriber_bot .
 
+RUN ls -l /root/
+
 CMD ["./transcriber_bot"]
