@@ -14,7 +14,7 @@ type Storage interface {
 
 type Event struct {
 	ID        uint
-	Type      events.Type
+	Type      events.EventType
 	FilePath  string
 	FileSize  int
 	Text      string

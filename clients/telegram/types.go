@@ -1,5 +1,7 @@
 package telegram
 
+import "github.com/MirToykin/voice-transcriber-tg-bot/events"
+
 type BaseResponse struct {
 	OK          bool   `json:"ok"`
 	ErrorCode   int    `json:"error_code"`
@@ -27,7 +29,8 @@ type From struct {
 }
 
 type Chat struct {
-	ID int `json:"id"`
+	ID   int             `json:"id"`
+	Type events.ChatType `json:"type"`
 }
 
 type File struct {

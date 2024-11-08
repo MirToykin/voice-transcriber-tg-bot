@@ -35,14 +35,6 @@ type Processor interface {
 	Process(ctx context.Context, e *Event) error
 }
 
-type Type int
-
-const (
-	Unknown Type = iota
-	TextMessage
-	VoiceMessage
-)
-
 type AudioFile struct {
 	Path      string
 	SizeBytes int
@@ -50,7 +42,7 @@ type AudioFile struct {
 
 type Event struct {
 	ID        any
-	Type      Type
+	Type      EventType
 	AudioFile AudioFile
 	Text      string
 	Meta      interface{}

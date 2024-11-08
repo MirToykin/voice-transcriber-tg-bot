@@ -64,9 +64,12 @@ func toTgProcessorMeta(event *events.Event) (Meta, error) {
 	return res, nil
 }
 
-func fetchType(upd tgClient.Update) events.Type {
+func fetchType(upd tgClient.Update) events.EventType {
 	if upd.Message != nil {
 		if upd.Message.Text != nil && upd.Message.Voice == nil {
+			if upd.Message.Chat.Type == events.GroupChat {
+				return events.GroupTextMessage
+			}
 			return events.TextMessage
 		} else if upd.Message.Voice != nil {
 			return events.VoiceMessage

@@ -75,6 +75,8 @@ func (p *Processor) Process(ctx context.Context, e *events.Event) error {
 		return p.processTextMessage(ctx, e)
 	case events.VoiceMessage:
 		return p.processVoiceMessage(ctx, e)
+	case events.GroupTextMessage:
+		return nil
 	default:
 		return &events.ProcessingError{
 			Message:   "can't process message",
