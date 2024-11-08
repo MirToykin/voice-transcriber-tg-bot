@@ -7,7 +7,6 @@ import (
 	"github.com/MirToykin/voice-transcriber-tg-bot/lib/e"
 	"github.com/pkg/errors"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"path"
@@ -143,12 +142,12 @@ func (c *Client) doRequest(ctx context.Context, method string, query url.Values)
 	encodeParams := query.Encode()
 	req.URL.RawQuery = encodeParams
 
-	logParams := ""
-	if encodeParams != "" {
-		logParams = fmt.Sprintf("?%s", encodeParams)
-	}
+	//logParams := ""
+	//if encodeParams != "" {
+	//	logParams = fmt.Sprintf("?%s", encodeParams)
+	//}
 
-	log.Printf("Performing request to %s://%s/%s%s\n", reqUrl.Scheme, reqUrl.Host, reqUrl.Path, logParams)
+	//log.Printf("Performing request to %s://%s/%s%s\n", reqUrl.Scheme, reqUrl.Host, reqUrl.Path, logParams)
 
 	res, err := c.client.Do(req)
 	if err != nil {
