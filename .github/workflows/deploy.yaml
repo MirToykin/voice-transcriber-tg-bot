@@ -56,4 +56,5 @@ jobs:
             echo "TAG_NAME=$TAG_NAME" > .env
             echo "$ENV_FILE" >> .env
             
-            docker run --rm --name $CONTAINER_NAME --env-file .env -d $REGISTRY/$IMAGE_NAME:$TAG_NAME
+            docker rm $CONTAINER_NAME
+            docker run --name $CONTAINER_NAME --env-file .env -v ${{ vars.SERVICE_PATH }}:/root/ -d $REGISTRY/$IMAGE_NAME:$TAG_NAME
