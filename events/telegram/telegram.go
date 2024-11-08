@@ -76,8 +76,11 @@ func (p *Processor) Process(ctx context.Context, e *events.Event) error {
 	case events.VoiceMessage:
 		return p.processVoiceMessage(ctx, e)
 	default:
-		log.Printf("got unknown event type, event: %s", e)
-		return nil
+		return &events.ProcessingError{
+			Message:   "can't process message",
+			Cause:     ErrUnknownEventType,
+			NeedRetry: false,
+		}
 	}
 }
 
