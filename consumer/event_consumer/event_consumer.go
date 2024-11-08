@@ -27,6 +27,7 @@ func New(fetcher events.Fetcher, processor events.Processor, st storage.Storage,
 }
 
 func (c *Consumer) Start(ctx context.Context) error {
+	log.Println("Start fetching events...")
 	failsCount := 0
 	for {
 		if failsCount >= 15 {
@@ -50,6 +51,7 @@ func (c *Consumer) Start(ctx context.Context) error {
 }
 
 func (c *Consumer) StartUnprocessed(ctx context.Context) error {
+	log.Println("Start fetching unprocessed events...")
 	failsCount := 0
 	for {
 		if failsCount >= 15 {
