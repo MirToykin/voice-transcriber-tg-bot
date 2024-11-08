@@ -9,6 +9,7 @@ env:
   IMAGE_NAME: "transcriber-bot"
   CONTAINER_NAME: "transcriber-bot-container"
   ENV_FILE: ${{ secrets.ENV_FILE }}
+  DB_DSN: ${{ secrets.DB_DSN }}
 
 jobs:
   image-build-and-push:
@@ -44,7 +45,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          envs: IMAGE_NAME,REGISTRY,GITHUB_SHA,CONTAINER_NAME,ENV_FILE
+          envs: IMAGE_NAME,REGISTRY,GITHUB_SHA,CONTAINER_NAME,ENV_FILE,DB_DSN
           script: |
             # Set up variables
             TAG_NAME=$(echo $GITHUB_SHA | head -c7)
@@ -55,6 +56,15 @@ jobs:
             # create .env
             echo "TAG_NAME=$TAG_NAME" > .env
             echo "$ENV_FILE" >> .env
+            echo "$DB_DSN" >> .env
+            
+            if [ ! -f "${{ vars.SERVICE_PATH }}/storage/$DB_DSN" ]; then
+              echo "Storage doesn't exist. Creating storage file..."
+              mkdir -p "$(dirname "${{ vars.SERVICE_PATH }}/storage/")"
+              touch "${{ vars.SERVICE_PATH }}/storage/$DB_DSN"
+            else
+              echo "Storage file already exists. Skipping creation."
+            fi
             
             docker stop $CONTAINER_NAME
             docker rm $CONTAINER_NAME
