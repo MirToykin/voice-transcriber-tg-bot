@@ -21,7 +21,7 @@ func New(ctx context.Context, storagePath string) (*Storage, error) {
 	}
 
 	if err = db.Ping(); err != nil {
-		return nil, errors.Wrap(err, "failed to connect to database")
+		return nil, errors.Wrapf(err, "failed to connect to database: %s", storagePath)
 	}
 
 	s := &Storage{db: db}
