@@ -62,11 +62,13 @@ func (c *Client) Updates(ctx context.Context, offset, limit int) (updates []Upda
 		return nil, err
 	}
 
-	log.Printf("Telegram updates response: %s", string(data))
-
 	var res UpdatesResponse
 	if err = json.Unmarshal(data, &res); err != nil {
 		return nil, err
+	}
+
+	if !res.OK {
+		return nil, fmt.Errorf("error code: %d, description: %s", res.ErrorCode, res.Description)
 	}
 
 	return res.Result, nil
@@ -139,6 +141,9 @@ func (c *Client) doRequest(ctx context.Context, method string, query url.Values)
 	}
 
 	req.URL.RawQuery = query.Encode()
+
+	log.Printf("Performing request to https://%s%s\n", req.Host, req.RequestURI)
+
 	res, err := c.client.Do(req)
 	if err != nil {
 		return nil, err
