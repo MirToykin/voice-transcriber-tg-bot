@@ -55,3 +55,14 @@ type Event struct {
 	Text      string
 	Meta      interface{}
 }
+
+func (e *Event) String() string {
+	return fmt.Sprintf(
+		"ID: %v, Type: %d, AudioPath: %s, AudioSize: %d, Text: %s",
+		e.ID,
+		e.Type,
+		e.AudioFile.Path,
+		e.AudioFile.SizeBytes,
+		e.Text,
+	)
+}
