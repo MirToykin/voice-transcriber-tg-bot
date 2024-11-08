@@ -15,7 +15,7 @@ type Config struct {
 func MustLoad() Config {
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatal("failed to load .env")
+		log.Fatalf("failed to load .env: %s", err)
 	}
 	token := os.Getenv(tgBotToken)
 	if token == "" {
