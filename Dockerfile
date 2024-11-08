@@ -5,6 +5,7 @@ WORKDIR /github.com/MirToykin/voice-transcriber-tg-bot/source/
 
 RUN go mod download
 RUN go build -o ./bin/transcriber_bot main.go
+RUN chmod +x ./bin/transcriber_bot
 
 FROM alpine:latest
 
