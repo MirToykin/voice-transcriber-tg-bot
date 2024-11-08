@@ -15,8 +15,9 @@ type Config struct {
 func MustLoad() Config {
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatalf("failed to load .env: %s", err)
+		log.Printf("failed to load .env: %s\n", err)
 	}
+
 	token := os.Getenv(tgBotToken)
 	if token == "" {
 		log.Fatal("Telegram bot token isn't set")
