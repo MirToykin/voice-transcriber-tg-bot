@@ -2,11 +2,10 @@ package whisper
 
 import (
 	"context"
-	"fmt"
 	"github.com/MirToykin/voice-transcriber-tg-bot/events"
 	"github.com/MirToykin/voice-transcriber-tg-bot/transcribtion/whisper/generated"
 	"github.com/pkg/errors"
-	"strings"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type Transcriber struct {
@@ -21,22 +20,18 @@ func New(client generated.TranscriptionServiceClient) *Transcriber {
 
 func (t *Transcriber) TranscribeByPath(ctx context.Context, filePath string, lang *string) (string, error) {
 	res, err := t.client.TranscribeByPath(
-		ctx, &generated.TranscribePathRequest{
+		ctx, &generated.TranscribeByPathRequest{
 			FilePath: filePath,
 			Lang:     lang,
 		},
 	)
 
 	if err != nil {
-		//TODO: сделать более надежный способ проверки
-		if strings.Contains(err.Error(), fmt.Sprintf("Not Found for url: %s", filePath)) {
-			err = &events.ProcessingError{
-				Message:   "file not found",
-				Cause:     err,
-				NeedRetry: false,
-			}
-		}
 		return "", errors.Wrap(err, "failed to transcribe by path")
+	}
+
+	if !res.GetStatus() {
+		return "", events.NewProcessingError(res.GetErrorDescription(), checkIfTranscriptionNeedRetry(res), nil)
 	}
 
 	return res.GetText(), nil
@@ -44,7 +39,7 @@ func (t *Transcriber) TranscribeByPath(ctx context.Context, filePath string, lan
 
 func (t *Transcriber) TranscribeByBinary(ctx context.Context, audioData []byte, lang *string) (string, error) {
 	res, err := t.client.TranscribeByBinary(
-		ctx, &generated.TranscribeBinaryRequest{
+		ctx, &generated.TranscribeByBinaryRequest{
 			AudioData: audioData,
 			Lang:      lang,
 		},
@@ -54,5 +49,18 @@ func (t *Transcriber) TranscribeByBinary(ctx context.Context, audioData []byte, 
 		return "", errors.Wrap(err, "failed to transcribe by binary")
 	}
 
+	if !res.GetStatus() {
+		return "", events.NewProcessingError(res.GetErrorDescription(), checkIfTranscriptionNeedRetry(res), nil)
+	}
+
 	return res.GetText(), nil
+}
+
+func (t *Transcriber) AvailableLanguages(ctx context.Context) ([]string, error) {
+	res, err := t.client.GetAvailableLanguages(ctx, &emptypb.Empty{})
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get available languages")
+	}
+
+	return res.Languages, nil
 }

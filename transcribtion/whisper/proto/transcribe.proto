@@ -2,27 +2,41 @@ syntax = "proto3";
 
 option go_package = "github.com/MirToykin/voice-transcriber-tg-bot/transcription/generated";
 
-service TranscriptionService {
-    // Endpoint to transcribe audio by file path
-    rpc TranscribeByPath (TranscribePathRequest) returns (TranscriptionResponse);
+import "google/protobuf/empty.proto";
 
-    // Endpoint to transcribe audio by binary data
-    rpc TranscribeByBinary (TranscribeBinaryRequest) returns (TranscriptionResponse);
+service TranscriptionService {
+  // Endpoint to transcribe audio by file path
+  rpc TranscribeByPath (TranscribeByPathRequest) returns (TranscriptionResponse);
+
+  // Endpoint to transcribe audio by binary data
+  rpc TranscribeByBinary (TranscribeByBinaryRequest) returns (TranscriptionResponse);
+
+  // Endpoint to get available languages list
+  rpc GetAvailableLanguages (google.protobuf.Empty) returns (AvailableLanguagesResponse);
 }
 
 // Request containing the path to the audio file
-message TranscribePathRequest {
-    string file_path = 1;
-    optional string lang = 2;
+message TranscribeByPathRequest {
+  string file_path = 1;
+  optional string lang = 2;
 }
 
 // Request containing the binary data of the audio file
-message TranscribeBinaryRequest {
-    bytes audio_data = 1;
-    optional string lang = 2;
+message TranscribeByBinaryRequest {
+  bytes audio_data = 1;
+  optional string lang = 2;
 }
 
 // Response containing the transcription text
 message TranscriptionResponse {
-    string text = 1;
+  string text = 1;
+  bool status = 2;
+  int32 error_code = 3;
+  string error_description = 4;
 }
+
+// Response containing the available languages list
+message AvailableLanguagesResponse {
+  repeated string languages = 1;
+}
+

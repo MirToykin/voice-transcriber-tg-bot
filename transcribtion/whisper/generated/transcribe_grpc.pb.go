@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -23,9 +24,11 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TranscriptionServiceClient interface {
 	// Endpoint to transcribe audio by file path
-	TranscribeByPath(ctx context.Context, in *TranscribePathRequest, opts ...grpc.CallOption) (*TranscriptionResponse, error)
+	TranscribeByPath(ctx context.Context, in *TranscribeByPathRequest, opts ...grpc.CallOption) (*TranscriptionResponse, error)
 	// Endpoint to transcribe audio by binary data
-	TranscribeByBinary(ctx context.Context, in *TranscribeBinaryRequest, opts ...grpc.CallOption) (*TranscriptionResponse, error)
+	TranscribeByBinary(ctx context.Context, in *TranscribeByBinaryRequest, opts ...grpc.CallOption) (*TranscriptionResponse, error)
+	// Endpoint to get available languages list
+	GetAvailableLanguages(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*AvailableLanguagesResponse, error)
 }
 
 type transcriptionServiceClient struct {
@@ -36,7 +39,7 @@ func NewTranscriptionServiceClient(cc grpc.ClientConnInterface) TranscriptionSer
 	return &transcriptionServiceClient{cc}
 }
 
-func (c *transcriptionServiceClient) TranscribeByPath(ctx context.Context, in *TranscribePathRequest, opts ...grpc.CallOption) (*TranscriptionResponse, error) {
+func (c *transcriptionServiceClient) TranscribeByPath(ctx context.Context, in *TranscribeByPathRequest, opts ...grpc.CallOption) (*TranscriptionResponse, error) {
 	out := new(TranscriptionResponse)
 	err := c.cc.Invoke(ctx, "/TranscriptionService/TranscribeByPath", in, out, opts...)
 	if err != nil {
@@ -45,9 +48,18 @@ func (c *transcriptionServiceClient) TranscribeByPath(ctx context.Context, in *T
 	return out, nil
 }
 
-func (c *transcriptionServiceClient) TranscribeByBinary(ctx context.Context, in *TranscribeBinaryRequest, opts ...grpc.CallOption) (*TranscriptionResponse, error) {
+func (c *transcriptionServiceClient) TranscribeByBinary(ctx context.Context, in *TranscribeByBinaryRequest, opts ...grpc.CallOption) (*TranscriptionResponse, error) {
 	out := new(TranscriptionResponse)
 	err := c.cc.Invoke(ctx, "/TranscriptionService/TranscribeByBinary", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *transcriptionServiceClient) GetAvailableLanguages(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*AvailableLanguagesResponse, error) {
+	out := new(AvailableLanguagesResponse)
+	err := c.cc.Invoke(ctx, "/TranscriptionService/GetAvailableLanguages", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -59,9 +71,11 @@ func (c *transcriptionServiceClient) TranscribeByBinary(ctx context.Context, in 
 // for forward compatibility
 type TranscriptionServiceServer interface {
 	// Endpoint to transcribe audio by file path
-	TranscribeByPath(context.Context, *TranscribePathRequest) (*TranscriptionResponse, error)
+	TranscribeByPath(context.Context, *TranscribeByPathRequest) (*TranscriptionResponse, error)
 	// Endpoint to transcribe audio by binary data
-	TranscribeByBinary(context.Context, *TranscribeBinaryRequest) (*TranscriptionResponse, error)
+	TranscribeByBinary(context.Context, *TranscribeByBinaryRequest) (*TranscriptionResponse, error)
+	// Endpoint to get available languages list
+	GetAvailableLanguages(context.Context, *emptypb.Empty) (*AvailableLanguagesResponse, error)
 	mustEmbedUnimplementedTranscriptionServiceServer()
 }
 
@@ -69,11 +83,14 @@ type TranscriptionServiceServer interface {
 type UnimplementedTranscriptionServiceServer struct {
 }
 
-func (UnimplementedTranscriptionServiceServer) TranscribeByPath(context.Context, *TranscribePathRequest) (*TranscriptionResponse, error) {
+func (UnimplementedTranscriptionServiceServer) TranscribeByPath(context.Context, *TranscribeByPathRequest) (*TranscriptionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TranscribeByPath not implemented")
 }
-func (UnimplementedTranscriptionServiceServer) TranscribeByBinary(context.Context, *TranscribeBinaryRequest) (*TranscriptionResponse, error) {
+func (UnimplementedTranscriptionServiceServer) TranscribeByBinary(context.Context, *TranscribeByBinaryRequest) (*TranscriptionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TranscribeByBinary not implemented")
+}
+func (UnimplementedTranscriptionServiceServer) GetAvailableLanguages(context.Context, *emptypb.Empty) (*AvailableLanguagesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAvailableLanguages not implemented")
 }
 func (UnimplementedTranscriptionServiceServer) mustEmbedUnimplementedTranscriptionServiceServer() {}
 
@@ -89,7 +106,7 @@ func RegisterTranscriptionServiceServer(s grpc.ServiceRegistrar, srv Transcripti
 }
 
 func _TranscriptionService_TranscribeByPath_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TranscribePathRequest)
+	in := new(TranscribeByPathRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -101,13 +118,13 @@ func _TranscriptionService_TranscribeByPath_Handler(srv interface{}, ctx context
 		FullMethod: "/TranscriptionService/TranscribeByPath",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TranscriptionServiceServer).TranscribeByPath(ctx, req.(*TranscribePathRequest))
+		return srv.(TranscriptionServiceServer).TranscribeByPath(ctx, req.(*TranscribeByPathRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _TranscriptionService_TranscribeByBinary_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TranscribeBinaryRequest)
+	in := new(TranscribeByBinaryRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -119,7 +136,25 @@ func _TranscriptionService_TranscribeByBinary_Handler(srv interface{}, ctx conte
 		FullMethod: "/TranscriptionService/TranscribeByBinary",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TranscriptionServiceServer).TranscribeByBinary(ctx, req.(*TranscribeBinaryRequest))
+		return srv.(TranscriptionServiceServer).TranscribeByBinary(ctx, req.(*TranscribeByBinaryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TranscriptionService_GetAvailableLanguages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TranscriptionServiceServer).GetAvailableLanguages(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/TranscriptionService/GetAvailableLanguages",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TranscriptionServiceServer).GetAvailableLanguages(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -138,6 +173,10 @@ var TranscriptionService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "TranscribeByBinary",
 			Handler:    _TranscriptionService_TranscribeByBinary_Handler,
+		},
+		{
+			MethodName: "GetAvailableLanguages",
+			Handler:    _TranscriptionService_GetAvailableLanguages_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
