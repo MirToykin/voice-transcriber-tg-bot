@@ -3,11 +3,12 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	"github.com/MirToykin/voice-transcriber-tg-bot/events"
 	"github.com/MirToykin/voice-transcriber-tg-bot/lib/e"
-	"github.com/MirToykin/voice-transcriber-tg-bot/storage"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/pkg/errors"
+	"log"
 )
 
 type Storage struct {
@@ -34,12 +35,20 @@ func New(ctx context.Context, storagePath string) (*Storage, error) {
 	return s, nil
 }
 
-func (s *Storage) SaveUnprocessed(ctx context.Context, event *storage.Event) (err error) {
+func (s *Storage) SaveUnprocessed(ctx context.Context, event *events.Event) (err error) {
 	defer func() { err = e.WrapIfErr("failed to save unprocessed event", err) }()
 
 	q := "INSERT INTO events (type, file_path, file_size, text, meta, processed) values (?, ?, ?, ?, ?, 0)"
 
-	_, err = s.db.ExecContext(ctx, q, event.Type, event.FilePath, event.FileSize, event.Text, event.Meta)
+	_, err = s.db.ExecContext(
+		ctx,
+		q,
+		event.Type,
+		event.AudioFile.Path,
+		event.AudioFile.SizeBytes,
+		event.Text,
+		event.StringMeta(),
+	)
 	if err != nil {
 		return err
 	}
@@ -69,7 +78,7 @@ func (s *Storage) DeleteProcessed(ctx context.Context) error {
 	return nil
 }
 
-func (s *Storage) FetchUnprocessed(ctx context.Context, limit int) ([]*storage.Event, error) {
+func (s *Storage) FetchUnprocessed(ctx context.Context, limit int) ([]*events.Event, error) {
 	q := "SELECT id, type, file_path, file_size, text, meta FROM events WHERE processed = 0 LIMIT ?"
 
 	var eventsList []Event
@@ -77,16 +86,21 @@ func (s *Storage) FetchUnprocessed(ctx context.Context, limit int) ([]*storage.E
 	err := s.db.SelectContext(ctx, &eventsList, q, limit)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		return []*storage.Event{}, nil
+		return []*events.Event{}, nil
 	}
 
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to fetch processed")
 	}
 
-	storageEvents := make([]*storage.Event, 0, len(eventsList))
+	storageEvents := make([]*events.Event, 0, len(eventsList))
 	for _, ev := range eventsList {
-		storageEvents = append(storageEvents, fromLocalToStorageEvent(&ev))
+		baseEvent, err := fromEventToBase(&ev)
+		if err != nil {
+			log.Println("ERROR: failed to convert database event to event")
+			continue
+		}
+		storageEvents = append(storageEvents, baseEvent)
 	}
 
 	return storageEvents, nil

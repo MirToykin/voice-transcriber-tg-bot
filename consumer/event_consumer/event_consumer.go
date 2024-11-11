@@ -13,11 +13,11 @@ import (
 type Consumer struct {
 	fetcher   events.Fetcher
 	processor events.Processor
-	storage   storage.Storage
+	storage   storage.EventStorage
 	batchSize int
 }
 
-func New(fetcher events.Fetcher, processor events.Processor, st storage.Storage, batchSize int) *Consumer {
+func New(fetcher events.Fetcher, processor events.Processor, st storage.EventStorage, batchSize int) *Consumer {
 	return &Consumer{
 		fetcher:   fetcher,
 		processor: processor,
@@ -103,14 +103,9 @@ func (c *Consumer) handleEvent(ctx context.Context, wg *sync.WaitGroup, event *e
 		isCustomErr := errors.As(err, &processingError)
 
 		if !isCustomErr || processingError.NeedRetry {
-			log.Printf("ERROR: failed to process event %d: %s\n", event.ID, err)
+			log.Printf("ERROR: failed to process event (external id: %v): %s\n", event.ExternalID, err)
 
-			storageEvent, err := storage.FromBaseToStorageEvent(event)
-			if err != nil {
-				log.Printf("failed to process event: %s", err)
-			}
-
-			err = c.storage.SaveUnprocessed(ctx, storageEvent)
+			err = c.storage.SaveUnprocessed(ctx, event)
 			if err != nil {
 				log.Printf("ERROR: failed to save unprocessed event %d: %s\n", event.ID, err)
 			}
@@ -122,7 +117,7 @@ func (c *Consumer) handleEvent(ctx context.Context, wg *sync.WaitGroup, event *e
 
 func (c *Consumer) handleUnprocessedEvents(
 	ctx context.Context,
-	events []*storage.Event,
+	events []*events.Event,
 ) {
 	wg := sync.WaitGroup{}
 	wg.Add(len(events))
@@ -134,20 +129,15 @@ func (c *Consumer) handleUnprocessedEvents(
 	wg.Wait()
 }
 
-func (c *Consumer) handleUnprocessedEvent(ctx context.Context, wg *sync.WaitGroup, event *storage.Event) {
+func (c *Consumer) handleUnprocessedEvent(ctx context.Context, wg *sync.WaitGroup, event *events.Event) {
 	defer wg.Done()
-	baseEvent, err := storage.FromStorageToBaseEvent(event)
-	if err != nil {
-		log.Printf("ERROR: failed to process unprocessed event: %s\n", err)
-		return
-	}
 
 	task := withRetry(
 		func() error {
-			return c.processor.Process(ctx, baseEvent)
+			return c.processor.Process(ctx, event)
 		}, 3,
 	)
-	err = task()
+	err := task()
 
 	if err != nil {
 		var processingError *events.ProcessingError

@@ -3,7 +3,6 @@ package sqlite
 import (
 	"encoding/json"
 	"github.com/MirToykin/voice-transcriber-tg-bot/events"
-	"github.com/MirToykin/voice-transcriber-tg-bot/storage"
 	"github.com/pkg/errors"
 )
 
@@ -27,6 +26,7 @@ func fromBaseToEvent(event *events.Event) (*Event, error) {
 
 func fromEventToBase(event *Event) (*events.Event, error) {
 	baseEvent := &events.Event{
+		ID:   event.ID,
 		Type: event.Type,
 		AudioFile: events.AudioFile{
 			Path:      event.FilePath,
@@ -44,16 +44,4 @@ func fromEventToBase(event *Event) (*events.Event, error) {
 	baseEvent.Meta = meta
 
 	return baseEvent, nil
-}
-
-func fromLocalToStorageEvent(event *Event) *storage.Event {
-	return &storage.Event{
-		ID:        event.ID,
-		Type:      event.Type,
-		FilePath:  event.FilePath,
-		FileSize:  event.FileSize,
-		Text:      event.Text,
-		Meta:      event.Meta,
-		Processed: event.Processed,
-	}
 }
