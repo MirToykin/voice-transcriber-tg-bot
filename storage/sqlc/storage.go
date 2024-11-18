@@ -3,6 +3,7 @@ package sqlc
 import (
 	"database/sql"
 	"github.com/MirToykin/voice-transcriber-tg-bot/storage/sqlc/db"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type Storage struct {
