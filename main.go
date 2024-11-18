@@ -6,7 +6,7 @@ import (
 	"github.com/MirToykin/voice-transcriber-tg-bot/config"
 	event_consumer "github.com/MirToykin/voice-transcriber-tg-bot/consumer/event_consumer"
 	"github.com/MirToykin/voice-transcriber-tg-bot/events/telegram"
-	"github.com/MirToykin/voice-transcriber-tg-bot/storage/sqlite"
+	"github.com/MirToykin/voice-transcriber-tg-bot/storage/sqlc"
 	"github.com/MirToykin/voice-transcriber-tg-bot/transcribtion/whisper"
 	"github.com/MirToykin/voice-transcriber-tg-bot/transcribtion/whisper/generated"
 	"google.golang.org/grpc"
@@ -37,7 +37,7 @@ func main() {
 		whisperTranscriber,
 	)
 
-	storage, err := sqlite.New(ctx, cfg.DbDSN)
+	storage, err := sqlc.New(cfg.DbDSN)
 	if err != nil {
 		log.Fatalf("failed to get storage: %s", err)
 	}
