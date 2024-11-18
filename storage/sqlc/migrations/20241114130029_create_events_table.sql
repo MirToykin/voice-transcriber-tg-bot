@@ -15,5 +15,6 @@ CREATE INDEX idx_events_processed ON events (processed);
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE events;
+DROP INDEX IF EXISTS idx_events_processed;
+DROP TABLE IF EXISTS events;
 -- +goose StatementEnd

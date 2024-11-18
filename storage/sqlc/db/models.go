@@ -6,6 +6,7 @@ package db
 
 import (
 	"database/sql"
+	"time"
 )
 
 type Event struct {
@@ -16,4 +17,12 @@ type Event struct {
 	Text      sql.NullString
 	Meta      sql.NullString
 	Processed bool
+}
+
+type User struct {
+	ID      int64
+	Login   string
+	Lang    string
+	Created time.Time
+	Updated time.Time
 }
