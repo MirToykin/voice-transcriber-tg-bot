@@ -1,4 +1,6 @@
 /.idea/*
-/transcribtion/whisper/bin/
+/internal/service/whisper/bin/
 /storage/sqlc/bin
 /.env
+/internal/clients/transcriber/bin/protoc-gen-go
+/internal/clients/transcriber/bin/protoc-gen-go-grpc

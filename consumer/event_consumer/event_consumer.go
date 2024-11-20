@@ -2,8 +2,9 @@ package event_consumer
 
 import (
 	"context"
-	"github.com/MirToykin/voice-transcriber-tg-bot/events"
-	"github.com/MirToykin/voice-transcriber-tg-bot/storage"
+	"github.com/MirToykin/voice-transcriber-tg-bot/internal/models/events"
+	"github.com/MirToykin/voice-transcriber-tg-bot/internal/service"
+	"github.com/MirToykin/voice-transcriber-tg-bot/internal/storage"
 	"github.com/pkg/errors"
 	"log"
 	"sync"
@@ -11,18 +12,16 @@ import (
 )
 
 type Consumer struct {
-	fetcher   events.Fetcher
-	processor events.Processor
-	storage   storage.EventStorage
-	batchSize int
+	eventsService service.EventService
+	storage       storage.EventStorage
+	batchSize     int
 }
 
-func New(fetcher events.Fetcher, processor events.Processor, st storage.EventStorage, batchSize int) *Consumer {
+func New(eventsService service.EventService, st storage.EventStorage, batchSize int) *Consumer {
 	return &Consumer{
-		fetcher:   fetcher,
-		processor: processor,
-		storage:   st,
-		batchSize: batchSize,
+		eventsService: eventsService,
+		storage:       st,
+		batchSize:     batchSize,
 	}
 }
 
@@ -33,7 +32,7 @@ func (c *Consumer) Start(ctx context.Context) error {
 		if failsCount >= 15 {
 			return errors.New("unable to start consumer")
 		}
-		gotEvents, err := c.fetcher.Fetch(context.Background(), c.batchSize)
+		gotEvents, err := c.eventsService.Fetch(context.Background(), c.batchSize)
 		if err != nil {
 			log.Printf("[ERR] consumer: %s\n", err.Error())
 			failsCount++
@@ -93,7 +92,7 @@ func (c *Consumer) handleEvent(ctx context.Context, wg *sync.WaitGroup, event *e
 	defer wg.Done()
 	task := withRetry(
 		func() error {
-			return c.processor.Process(ctx, event)
+			return c.eventsService.Process(ctx, event)
 		}, 3,
 	)
 	err := task()
@@ -134,7 +133,7 @@ func (c *Consumer) handleUnprocessedEvent(ctx context.Context, wg *sync.WaitGrou
 
 	task := withRetry(
 		func() error {
-			return c.processor.Process(ctx, event)
+			return c.eventsService.Process(ctx, event)
 		}, 3,
 	)
 	err := task()

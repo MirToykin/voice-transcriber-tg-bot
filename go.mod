@@ -1,9 +1,10 @@
 module github.com/MirToykin/voice-transcriber-tg-bot
 
-go 1.22
+go 1.22.0
+
+toolchain go1.22.5
 
 require (
-	github.com/jmoiron/sqlx v1.4.0
 	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/pkg/errors v0.9.1
@@ -12,6 +13,7 @@ require (
 )
 
 require (
+	github.com/gomscourse/common v1.0.8 // indirect
 	golang.org/x/net v0.26.0 // indirect
 	golang.org/x/sys v0.21.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
